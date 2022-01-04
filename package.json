@@ -1,0 +1,27 @@
+{
+  "name": "comuniopoints",
+  "version": "1.0.1",
+  "description": "Programa en Javascript utilizando los frameworks [Node.js](https://nodejs.org/en/) y [Nightmare](https://github.com/segmentio/nightmare) para pagar jornadas en [Comunio](https://www.comunio.es/).",
+  "main": "Main.js",
+  "dependencies": {
+    "nightmare": "^3.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AbrahamPFdez/ComunioPoints.git"
+  },
+  "author": "Abraham",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AbrahamPFdez/ComunioPoints/issues"
+  },
+  "homepage": "https://github.com/AbrahamPFdez/ComunioPoints#readme",
+  "keywords": [
+    "football",
+    "comunio"
+  ]
+}

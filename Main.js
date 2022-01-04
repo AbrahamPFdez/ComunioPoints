@@ -7,7 +7,7 @@ const REWARDS_URL = 'https://www.comunio.es/setup/clubs/rewardsAndDisciplinary'
 const BASE_SALARY = 1000000
 const POINT_VALUE = 14000
 
-const nightmare = Nightmare({    
+const nightmare = Nightmare({
     waitTimeout: 60000
 })
 
@@ -21,7 +21,8 @@ class Player {
         this.points = 0
     }
     get pay() {
-        return BASE_SALARY - this.points * POINT_VALUE
+        let pay = BASE_SALARY - this.points * POINT_VALUE
+        return (pay <= 0) ? 1 : pay
     }
 }
 
@@ -30,7 +31,7 @@ var createPlayer = (value, index) => {
 }
 
 async function post_login() {
-    console.log("Logging in with {" + user + ", " + password + "}")    
+    console.log("Logging in with {" + user + ", " + password + "}")
     await nightmare
         .goto(HOME_URL)
         .wait("a.login-btn.registration-btn-fill")
@@ -58,9 +59,9 @@ async function get_week_ranking_players() {
 async function get_week_ranking_points() {
     console.log("Getting players points ...")
     await nightmare
-    .evaluate(  
-        () => Array.from(document.querySelectorAll("div.standingstable_row_left > div.click-and-hover-area > div.points-inactive > span")).map(e => e.textContent)
-    )
+        .evaluate(
+            () => Array.from(document.querySelectorAll("div.standingstable_row_left > div.click-and-hover-area > div.points-inactive > span")).map(e => e.textContent)
+        )
         .then((player_points_list) => {
             let formatted_list = Array.from(player_points_list).map(e => (Number.isNaN(parseInt(String(e).substring(1)))) ? 0 : parseInt(String(e).substring(1)))
             formatted_list.forEach((value, index) => { player_list[index].points = value })
@@ -98,34 +99,21 @@ function do_pay(value, index) {
         setTimeout(() => {
             let player = player_list.find(player => player.name === value)
             console.log("[" + index + "] " + player.position + "º - " + player.name + ': ' + player.pay + "€.")
-
-            if (index + 1 === player_list.length){
-                nightmare
+            nightmare
                 .wait("#cont-setup-impose-penalties > div.margin_left_10 > div:nth-child(3) > div")
                 .click("#cont-setup-impose-penalties > div.margin_left_10 > div:nth-child(3) > div")
                 .wait("#cont-setup-impose-penalties > div.margin_left_10 > div:nth-child(3) > div > div.select_options.pos_abs > div:nth-child(" + (index + 1) + ")")
                 .click("#cont-setup-impose-penalties > div.margin_left_10 > div:nth-child(3) > div > div.select_options.pos_abs > div:nth-child(" + (index + 1) + ")")
                 .wait("#cont-setup-impose-penalties input")
-                .type("#cont-setup-impose-penalties input", player.pay)
+                .insert("#cont-setup-impose-penalties input", false)
+                .insert("#cont-setup-impose-penalties input", player.pay)
                 .type("#cont-setup-impose-penalties textarea", player.position)
                 .click(".button")
-                .end()
-                .then(() => { console.log("Done") })
-                .catch((error) => { console.error(error) }) 
+            if (index + 1 === player_list.length) {
+                nightmare.end()
             }
-            else{
-                nightmare
-                .wait("#cont-setup-impose-penalties > div.margin_left_10 > div:nth-child(3) > div")
-                .click("#cont-setup-impose-penalties > div.margin_left_10 > div:nth-child(3) > div")
-                .wait("#cont-setup-impose-penalties > div.margin_left_10 > div:nth-child(3) > div > div.select_options.pos_abs > div:nth-child(" + (index + 1) + ")")
-                .click("#cont-setup-impose-penalties > div.margin_left_10 > div:nth-child(3) > div > div.select_options.pos_abs > div:nth-child(" + (index + 1) + ")")
-                .wait("#cont-setup-impose-penalties input")
-                .type("#cont-setup-impose-penalties input", player.pay)
-                .type("#cont-setup-impose-penalties textarea", player.position)
-                .click(".button")
-                .then(() => { console.log("Done") })
-                .catch((error) => { console.error(error) }) 
-            }
+            nightmare.then(() => { console.log("Done") })
+                .catch((error) => { console.error(error) })
             resolve();
         }, 5000);
     });
